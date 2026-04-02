@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoLead · Bergamo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">AutoLead</div>
+    <div class="logo-sub">Bergamo · Sistema</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Pipeline</div>
+    <div class="stato-nav" id="stato-nav">
+      <button class="nav-item active" data-stato="">
+        <span class="nav-item-label">Tutti</span>
+        <span class="nav-badge" id="cnt-all">—</span>
+      </button>
+      <button class="nav-item" data-stato="nuovo">
+        <span class="nav-item-dot dot-blue"></span>
+        <span class="nav-item-label">Nuovi</span>
+        <span class="nav-badge" id="cnt-nuovo">—</span>
+      </button>
+      <button class="nav-item" data-stato="contattato">
+        <span class="nav-item-dot dot-amber"></span>
+        <span class="nav-item-label">Contattati</span>
+        <span class="nav-badge" id="cnt-contattato">—</span>
+      </button>
+      <button class="nav-item" data-stato="risposto">
+        <span class="nav-item-dot dot-purple"></span>
+        <span class="nav-item-label">Risposte</span>
+        <span class="nav-badge" id="cnt-risposto">—</span>
+      </button>
+      <button class="nav-item" data-stato="appuntamento">
+        <span class="nav-item-dot dot-orange"></span>
+        <span class="nav-item-label">Appuntamento</span>
+        <span class="nav-badge" id="cnt-appuntamento">—</span>
+      </button>
+      <button class="nav-item" data-stato="venduto">
+        <span class="nav-item-dot dot-green"></span>
+        <span class="nav-item-label">Venduti</span>
+        <span class="nav-badge" id="cnt-venduto">—</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="sidebar-filters">
+    <div class="nav-label">Filtri</div>
+    <div class="filter-group">
+      <select class="sb-select" id="filter-fonte">
+        <option value="">Tutte le fonti</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <select class="sb-select" id="filter-brand">
+        <option value="">Tutti i brand</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="score-label-row">
+        <span class="score-label-text">Score minimo</span>
+        <span class="score-label-val" id="score-display">0</span>
+      </div>
+      <input type="range" class="sb-range" min="0" max="10" value="0" id="filter-score">
+      <div class="range-ticks"><span>0</span><span>5</span><span>10</span></div>
+    </div>
+  </div>
+
+  <div class="sidebar-actions">
+    <button class="action-btn action-run" id="run-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span id="run-label">Avvia scraping</span>
+    </button>
+    <a class="action-btn action-export" href="/api/export" download>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Esporta CSV
+    </a>
+    <button class="action-btn action-settings" id="settings-btn" onclick="openSettings()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Impostazioni
+    </button>
+  </div>
+</aside>
+
+<!-- ══ PANNELLO IMPOSTAZIONI ═════════════════════════════ -->
+<div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settings-panel">
+
+  <div class="settings-header">
+    <div class="settings-header-inner">
+      <div class="settings-header-accent"></div>
+      <div class="settings-title-block">
+        <span class="settings-title">Impostazioni</span>
+        <span class="settings-subtitle">Configurazione sistema</span>
+      </div>
+    </div>
+    <button class="settings-close" onclick="closeSettings()" title="Chiudi (ESC)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="settings-body">
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Autenticazione
+      </div>
+      <div class="settings-field">
+        <label class="settings-label" for="cfg-groq-key">Groq API Key</label>
+        <div class="settings-key-row">
+          <input class="settings-input" type="password" id="cfg-groq-key" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+          <button class="settings-eye" onclick="toggleKeyVisibility()" title="Mostra/nascondi">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="settings-hint">Ottienila gratis su <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Zona di ricerca
+      </div>
+      <div class="settings-row-2">
+        <div class="settings-field">
+          <label class="settings-label" for="cfg-cap">CAP centro</label>
+          <input class="settings-input" type="text" id="cfg-cap" placeholder="24100" maxlength="5">
+          <div class="settings-hint">Codice avviamento postale</div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="cfg-raggio">Raggio (km)</label>
+          <input class="settings-input" type="number" id="cfg-raggio" min="5" max="100" placeholder="30">
+          <div class="settings-hint">5 – 100 km</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Limiti scraping
+      </div>
+      <div class="settings-row-2">
+        <div class="settings-field">
+          <label class="settings-label" for="cfg-max-lead">Max lead / ciclo</label>
+          <input class="settings-input" type="number" id="cfg-max-lead" min="1" max="100" placeholder="15">
+          <div class="settings-hint">Analizzati dall'AI</div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="cfg-subito-pages">Pagine Subito.it</label>
+          <input class="settings-input" type="number" id="cfg-subito-pages" min="1" max="20" placeholder="6">
+          <div class="settings-hint">~30 annunci / pag.</div>
+        </div>
+      </div>
+      <div class="settings-field" style="margin-top:4px">
+        <label class="settings-label" for="cfg-autoscout-items">Max annunci AutoScout24</label>
+        <input class="settings-input" type="number" id="cfg-autoscout-items" min="10" max="200" placeholder="30">
+        <div class="settings-hint">Risultati totali da AutoScout24</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="settings-footer">
+    <div class="settings-footer-hint"><kbd>ESC</kbd> chiude senza salvare</div>
+    <button class="settings-save-btn" onclick="saveSettings()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Salva impostazioni
+    </button>
+  </div>
+</div>
+
+<!-- ══ MAIN ═════════════════════════════════════════════ -->
+<div class="main">
+
+  <header class="topbar">
+    <div class="topbar-stats">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-totale">—</div>
+        <div class="stat-lbl">Totali</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num blue" id="stat-nuovi">—</div>
+        <div class="stat-lbl">Nuovi</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num amber" id="stat-contattati">—</div>
+        <div class="stat-lbl">Contattati</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num green" id="stat-venduti">—</div>
+        <div class="stat-lbl">Venduti</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num accent" id="stat-score">—</div>
+        <div class="stat-lbl">Score medio</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="search-input" type="text" placeholder="Cerca marca, città, parola chiave...">
+      </div>
+      <div class="view-toggle">
+        <button class="vt-btn active" id="btn-lista" data-view="lista">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Lista
+        </button>
+        <button class="vt-btn" id="btn-mappa" data-view="mappa">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Mappa
+        </button>
+      </div>
+      <span class="results-count" id="results-count"></span>
+    </div>
+  </header>
+
+  <div class="leads-area" id="leads-area">
+    <div class="leads-grid" id="leads-grid">
+      <div class="loading-state">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="map-container">
+    <div id="leaflet-map"></div>
+    <div class="geo-bar" id="geo-bar">
+      <div class="geo-spinner"></div>
+      <span id="geo-status">Geolocalizzazione in corso…</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/js/map.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

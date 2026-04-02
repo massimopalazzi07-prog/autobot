@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:ondata.github.io)",
+      "WebFetch(domain:developers.italia.it)",
+      "WebFetch(domain:aci.gov.it)",
+      "WebFetch(domain:lod.aci.it)",
+      "WebFetch(domain:www.dati.lombardia.it)",
+      "WebFetch(domain:dati.istat.it)",
+      "WebFetch(domain:demo.istat.it)",
+      "Bash(curl -s \"https://www.dati.lombardia.it/api/views/adjk-p5z2/rows.csv?accessType=DOWNLOAD\" -I)",
+      "Bash(curl -s \"https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1\" -I)",
+      "Bash(curl -s \"https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1\" -o /dev/null -w \"Status: %{http_code}\\\\n\")",
+      "Bash(curl -s \"https://demo.istat.it/api/\" -o /dev/null -w \"Status: %{http_code}\\\\n\")",
+      "WebFetch(domain:autoghinzani.it)",
+      "Bash(git --version)",
+      "Bash(gh --version)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\massi\\Desktop\\Work\\autobot"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python main.py --demo)",
+      "Bash(python main.py --stats)",
+      "Bash(python main.py --top)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(pip show:*)"
+    ]
+  }
+}
