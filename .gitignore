@@ -13,6 +13,9 @@ __pycache__/
 venv/
 env/
 
+# Claude Code (config locale)
+.claude/
+
 # Sistema
 .DS_Store
 Thumbs.db
